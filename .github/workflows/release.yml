@@ -1,0 +1,98 @@
+name: Create Release
+
+on:
+  push:
+    tags:
+      - '*.*.*'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Get tag name
+        id: tag
+        run: echo "tag=${GITHUB_REF#refs/tags/}" >> $GITHUB_OUTPUT
+
+      - name: Create plugin package
+        run: |
+          mkdir -p build
+          # Only include files needed for Joomla installation
+          # Documentation files (README.md, CHANGELOG.md, LICENSE) are excluded
+          zip -r build/plg_system_error404_v${{ steps.tag.outputs.tag }}.zip \
+            error404.xml \
+            services/ \
+            src/ \
+            language/ \
+            -x "*.git*" "*.DS_Store"
+
+      - name: Generate changelog
+        id: changelog
+        run: |
+          echo "## Changes in v${{ steps.tag.outputs.tag }}" > RELEASE_NOTES.md
+          echo "" >> RELEASE_NOTES.md
+
+          # Get the previous tag
+          PREVIOUS_TAG=$(git describe --abbrev=0 --tags $(git rev-list --tags --skip=1 --max-count=1) 2>/dev/null || echo "")
+
+          if [ -n "$PREVIOUS_TAG" ]; then
+            echo "### Commits since $PREVIOUS_TAG" >> RELEASE_NOTES.md
+            echo "" >> RELEASE_NOTES.md
+            git log $PREVIOUS_TAG..${{ steps.tag.outputs.tag }} --pretty=format:"- %s (%h)" >> RELEASE_NOTES.md
+          else
+            echo "### Initial Release" >> RELEASE_NOTES.md
+            echo "" >> RELEASE_NOTES.md
+            git log --pretty=format:"- %s (%h)" >> RELEASE_NOTES.md
+          fi
+
+          echo "" >> RELEASE_NOTES.md
+          echo "" >> RELEASE_NOTES.md
+          echo "## Installation" >> RELEASE_NOTES.md
+          echo "" >> RELEASE_NOTES.md
+          echo "1. Download the \`plg_system_error404_v${{ steps.tag.outputs.tag }}.zip\` file below" >> RELEASE_NOTES.md
+          echo "2. In Joomla administrator, go to System → Extensions → Install" >> RELEASE_NOTES.md
+          echo "3. Upload and install the package" >> RELEASE_NOTES.md
+          echo "4. Enable the plugin in System → Plugins" >> RELEASE_NOTES.md
+          echo "5. Configure your 404 error pages in the plugin settings" >> RELEASE_NOTES.md
+          echo "" >> RELEASE_NOTES.md
+          echo "For full documentation, see the [README](https://github.com/hans2103/plg_system_error404#readme)" >> RELEASE_NOTES.md
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: v${{ steps.tag.outputs.tag }}
+          name: Release v${{ steps.tag.outputs.tag }}
+          body_path: RELEASE_NOTES.md
+          files: |
+            build/plg_system_error404_v${{ steps.tag.outputs.tag }}.zip
+          draft: false
+          prerelease: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Checkout main branch
+        run: |
+          git fetch origin main
+          git checkout main
+
+      - name: Update update.xml
+        run: |
+          # Update version number
+          sed -i "s|<version>.*</version>|<version>${{ steps.tag.outputs.tag }}</version>|" update.xml
+
+          # Update download URL
+          sed -i "s|releases/download/v[^/]*/plg_system_error404_v[^<]*|releases/download/v${{ steps.tag.outputs.tag }}/plg_system_error404_v${{ steps.tag.outputs.tag }}|" update.xml
+
+      - name: Commit and push update.xml
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add update.xml
+          git commit -m "Update update.xml for version ${{ steps.tag.outputs.tag }}" || echo "No changes to commit"
+          git push origin main || echo "No changes to push"

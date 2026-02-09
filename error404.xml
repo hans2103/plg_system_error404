@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<extension type="plugin" group="system" method="upgrade">
+	<name>PLG_SYSTEM_ERROR404</name>
+	<author>HKweb</author>
+	<creationDate>February 2026</creationDate>
+	<copyright>Copyright (C) 2026 HKweb. All rights reserved.</copyright>
+	<license>GNU General Public License version 3 or later</license>
+	<authorEmail>info@hkweb.nl</authorEmail>
+	<authorUrl>https://hkweb.nl</authorUrl>
+	<version>26.06.00</version>
+	<description>PLG_SYSTEM_ERROR404_XML_DESCRIPTION</description>
+
+	<namespace path="src">HKweb\Plugin\System\Error404</namespace>
+
+	<files>
+		<folder plugin="error404">services</folder>
+		<folder>src</folder>
+		<folder>language</folder>
+	</files>
+
+	<config>
+		<fields name="params">
+			<fieldset name="basic">
+				<field name="404Pages"
+				       type="subform"
+				       description="PLG_ERROR404_PARAMS_REPEATABLE_PAGES_DESC"
+				       label="PLG_ERROR404_PARAMS_REPEATABLE_PAGES"
+				        multiple="true">
+						<form>
+							<field
+									name="language"
+									label="PLG_ERROR404_PARAMS_REPEATABLE_LANGUAGE"
+									description="PLG_ERROR404_PARAMS_REPEATABLE_LANGUAGE_DESC"
+									type="language"
+							/>
+							<field
+									name="menuItem"
+									label="PLG_ERROR404_PARAMS_REPEATABLE_MENUITEM"
+									description="PLG_ERROR404_PARAMS_REPEATABLE_MENUITEM_DESC"
+									type="menuitem"
+							/>
+						</form>
+				</field>
+			</fieldset>
+		</fields>
+	</config>
+
+	<updateservers>
+		<server type="extension" name="Error 404 Update Server">https://raw.githubusercontent.com/hans2103/plg_system_error404/main/update.xml</server>
+	</updateservers>
+</extension>

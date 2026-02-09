@@ -1,0 +1,14 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(zip:*)",
+      "Bash(git add:*)",
+      "Bash(git commit -m \"$\\(cat <<''EOF''\nRelease v26.06.01: Add credits to Perfect Web Team\n\n- Added credits acknowledging Perfect Web Team and their PWT404 plugin\n- Updated version to 26.06.01 in manifest and update server\n- Updated changelog with documentation changes\n\nCo-Authored-By: Claude Sonnet 4.5 <noreply@anthropic.com>\nEOF\n\\)\")",
+      "Bash(git tag:*)",
+      "Bash(git push:*)",
+      "Bash(gh release create:*)",
+      "Bash(gh release view:*)",
+      "Bash(gh release:*)"
+    ]
+  }
+}
