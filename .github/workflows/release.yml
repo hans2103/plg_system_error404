@@ -18,7 +18,11 @@ jobs:
 
       - name: Get tag name
         id: tag
-        run: echo "tag=${GITHUB_REF#refs/tags/}" >> $GITHUB_OUTPUT
+        run: |
+          TAG_WITH_V=${GITHUB_REF#refs/tags/}
+          TAG_WITHOUT_V=${TAG_WITH_V#v}
+          echo "tag=$TAG_WITHOUT_V" >> $GITHUB_OUTPUT
+          echo "tag_with_v=$TAG_WITH_V" >> $GITHUB_OUTPUT
 
       - name: Create plugin package
         run: |
@@ -66,7 +70,7 @@ jobs:
       - name: Create Release
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: v${{ steps.tag.outputs.tag }}
+          tag_name: ${{ steps.tag.outputs.tag_with_v }}
           name: Release v${{ steps.tag.outputs.tag }}
           body_path: RELEASE_NOTES.md
           files: |
