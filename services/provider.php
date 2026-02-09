@@ -27,7 +27,7 @@ use Joomla\Event\DispatcherInterface;
  *
  * Configures dependency injection for the Error404 system plugin.
  *
- * @since  1.0.0
+ * @since  26.06.00
  */
 return new class () implements ServiceProviderInterface {
 	/**
@@ -37,7 +37,7 @@ return new class () implements ServiceProviderInterface {
 	 *
 	 * @return  void
 	 *
-	 * @since   1.0.0
+	 * @since   26.06.00
 	 */
 	public function register(Container $container): void
 	{

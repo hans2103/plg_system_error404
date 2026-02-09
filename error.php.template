@@ -1,0 +1,74 @@
+<?php
+
+/**
+ * @package     Joomla.Site
+ * @subpackage  Templates.YOUR_TEMPLATE
+ *
+ * @copyright   (C) YOUR YEAR
+ * @license     GNU General Public License version 2 or later; see LICENSE.txt
+ *
+ * INSTRUCTIONS:
+ * 1. Copy this file to: /templates/YOUR_TEMPLATE/error.php
+ * 2. Replace YOUR_TEMPLATE with your actual template name in the docblock above
+ * 3. Replace YOUR YEAR with the current year
+ * 4. That's it! This file works with the Error404 plugin.
+ */
+
+\defined('_JEXEC') or die;
+
+use Joomla\CMS\Factory;
+
+/** @var Joomla\CMS\Document\ErrorDocument $this */
+
+if (!isset($this->error)) {
+    $this->error = new Exception('Error');
+    $this->debug = false;
+}
+
+// Set proper HTTP status code
+http_response_code($this->error->getCode());
+
+// For 404 errors, try to load custom error page via plugin
+if ($this->error->getCode() === 404) {
+    $app = Factory::getApplication();
+
+    // Check if error404 plugin set a menu item ID
+    if (isset($GLOBALS['error404_menu_item_id']) && $GLOBALS['error404_menu_item_id'] > 0) {
+        try {
+            // Boot the plugin and call its render method
+            $plugin = $app->bootPlugin('error404', 'system');
+
+            if (method_exists($plugin, 'render404PageFromErrorDocument')) {
+                $success = $plugin->render404PageFromErrorDocument(
+                    (int) $GLOBALS['error404_menu_item_id'],
+                    $this
+                );
+
+                // If successful, include the normal template
+                if ($success && isset($GLOBALS['error_page_component_output'])) {
+                    $templatePath = JPATH_THEMES . '/' . $app->getTemplate() . '/index.php';
+
+                    if (file_exists($templatePath)) {
+                        include $templatePath;
+                        return;
+                    }
+                }
+            }
+        } catch (Exception $e) {
+            // Fall through to default error page
+        }
+    }
+}
+
+// For all other errors, use Joomla's default system error template
+$systemErrorTemplate = JPATH_THEMES . '/system/error.php';
+
+if (file_exists($systemErrorTemplate)) {
+    include $systemErrorTemplate;
+} else {
+    // Fallback basic error display
+    echo '<!DOCTYPE html><html><head><title>Error ' . $this->error->getCode() . '</title></head><body>';
+    echo '<h1>Error ' . $this->error->getCode() . '</h1>';
+    echo '<p>' . htmlspecialchars($this->error->getMessage(), ENT_QUOTES, 'UTF-8') . '</p>';
+    echo '</body></html>';
+}

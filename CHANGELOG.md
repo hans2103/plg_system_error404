@@ -9,6 +9,31 @@ Version numbering: **YY.WW.NN** (Year.Week.Number)
 - WW = ISO week number (e.g., 06 for week 6)
 - NN = Incremental number starting at 00 for each week
 
+## [26.06.01] - 2026-02-09 (Week 6)
+
+### Added
+- `error.php.template` - Ready-to-use template file for easy installation
+- **Quick Start** section in README.md for 5-minute setup
+- **FAQ** section with common questions and answers
+- **Testing** section with verification checklist
+
+### Changed
+- **BREAKING**: Clarified that `error.php` override is REQUIRED (not optional) for URL preservation
+- **Documentation consolidation**: All documentation now in single README.md file
+- Enhanced template modification instructions with purpose and explanations
+- Added Quick Start section for rapid 5-minute setup
+- Enhanced "How It Works" section with detailed architecture flow
+- Improved troubleshooting section with error.php checks
+- Updated uninstallation instructions to include error.php removal
+
+### Removed
+- TEMPLATE_SETUP.md (merged into README.md)
+- INSTALL.md (merged into README.md Quick Start section)
+
+### Fixed
+- Corrected documentation stating error.php was optional (it's required for URL preservation)
+- Clarified the relationship between main.php and error.php modifications
+
 ## [26.06.00] - 2026-02-09 (Week 6)
 
 ### Added
@@ -39,4 +64,5 @@ Version numbering: **YY.WW.NN** (Year.Week.Number)
 - Plugin must be enabled
 - Menu items pointing to 404 articles must be created
 
+[26.06.01]: https://github.com/hans2103/plg_system_error404/releases/tag/v26.06.01
 [26.06.00]: https://github.com/hans2103/plg_system_error404/releases/tag/v26.06.00

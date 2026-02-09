@@ -31,7 +31,7 @@ defined('_JEXEC') or die;
  * Intercepts 404 errors and renders custom error pages.
  * Also prevents unpublishing, state changes, and deletion of configured 404 error pages.
  *
- * @since 1.0.0
+ * @since 26.06.00
  */
 final class Error404 extends CMSPlugin implements SubscriberInterface
 {
@@ -39,9 +39,17 @@ final class Error404 extends CMSPlugin implements SubscriberInterface
 	 * Load the language file on instantiation
 	 *
 	 * @var    bool
-	 * @since  1.0.0
+	 * @since  26.06.00
 	 */
 	protected $autoloadLanguage = true;
+
+	/**
+	 * Menu item ID to render for 404 error
+	 *
+	 * @var    int|null
+	 * @since  26.06.00
+	 */
+	private ?int $error404MenuItemId = null;
 
 	/**
 	 * Constructor
@@ -50,7 +58,7 @@ final class Error404 extends CMSPlugin implements SubscriberInterface
 	 * @param   array                $config      The plugin configuration
 	 * @param   DatabaseInterface    $database    The database connection
 	 *
-	 * @since   1.0.0
+	 * @since   26.06.00
 	 */
 	public function __construct(
 		DispatcherInterface $dispatcher,
@@ -65,7 +73,7 @@ final class Error404 extends CMSPlugin implements SubscriberInterface
 	 *
 	 * @return  array
 	 *
-	 * @since   1.0.0
+	 * @since   26.06.00
 	 */
 	public static function getSubscribedEvents(): array
 	{
@@ -81,19 +89,38 @@ final class Error404 extends CMSPlugin implements SubscriberInterface
 	}
 
 	/**
-	 * Intercept 404 errors and render custom error pages
+	 * Intercept 404 errors and prepare custom error page content
 	 *
 	 * @param   ErrorEvent  $event  The error event
 	 *
 	 * @return  void
 	 *
-	 * @since   1.0.0
+	 * @since   26.06.00
 	 */
 	public function onError(ErrorEvent $event): void
 	{
-		// The onError event fires too early (before document is created)
-		// So we can't handle 404s here. Let error.php handle it instead.
-		return;
+		$error = $event->getError();
+
+		// Only handle 404 errors
+		if ($error->getCode() !== 404)
+		{
+			return;
+		}
+
+		$app = $this->getApplication();
+		$langTag = $app->getLanguage()->getTag();
+
+		// Get the configured menu item for this language
+		$menuItemId = $this->getError404MenuItemId($langTag);
+
+		if (!$menuItemId)
+		{
+			return;
+		}
+
+		// Store the menu item ID so error.php can use it
+		$this->error404MenuItemId = $menuItemId;
+		$GLOBALS['error404_menu_item_id'] = $menuItemId;
 	}
 
 	/**
@@ -103,7 +130,7 @@ final class Error404 extends CMSPlugin implements SubscriberInterface
 	 *
 	 * @return  void
 	 *
-	 * @since   1.0.0
+	 * @since   26.06.00
 	 * @throws  Exception
 	 */
 	public function onContentBeforeSave(BeforeSaveEvent $event): void
@@ -135,7 +162,7 @@ final class Error404 extends CMSPlugin implements SubscriberInterface
 	 *
 	 * @return  void
 	 *
-	 * @since   1.0.0
+	 * @since   26.06.00
 	 * @throws  Exception
 	 */
 	public function onContentBeforeDelete(BeforeDeleteEvent $event): void
@@ -162,7 +189,7 @@ final class Error404 extends CMSPlugin implements SubscriberInterface
 	 *
 	 * @return  void
 	 *
-	 * @since   1.0.0
+	 * @since   26.06.00
 	 * @throws  Exception
 	 */
 	public function onContentChangeState(AfterChangeStateEvent $event): void
@@ -199,7 +226,7 @@ final class Error404 extends CMSPlugin implements SubscriberInterface
 	 *
 	 * @return  bool  True if content was prepared successfully
 	 *
-	 * @since   1.0.0
+	 * @since   26.06.00
 	 */
 	public function render404PageFromErrorDocument(int $menuItemId, ?object $document = null): bool
 	{
@@ -213,7 +240,7 @@ final class Error404 extends CMSPlugin implements SubscriberInterface
 	 *
 	 * @return  int|null  Menu item ID or null if not found
 	 *
-	 * @since   1.0.0
+	 * @since   26.06.00
 	 */
 	private function getError404MenuItemId(string $langTag): ?int
 	{
@@ -259,7 +286,7 @@ final class Error404 extends CMSPlugin implements SubscriberInterface
 	 *
 	 * @return  bool  True if content was prepared successfully
 	 *
-	 * @since   1.0.0
+	 * @since   26.06.00
 	 */
 	private function prepare404Content(int $menuItemId): bool
 	{
@@ -332,7 +359,7 @@ final class Error404 extends CMSPlugin implements SubscriberInterface
 	 *
 	 * @return  string|null  Rendered HTML or null on failure
 	 *
-	 * @since   1.0.0
+	 * @since   26.06.00
 	 */
 	private function renderArticle(int $articleId): ?string
 	{
@@ -399,7 +426,7 @@ final class Error404 extends CMSPlugin implements SubscriberInterface
 	 *
 	 * @return  void
 	 *
-	 * @since   1.0.0
+	 * @since   26.06.00
 	 * @throws  Exception
 	 */
 	private function validateArticleState(object $item): void
@@ -424,7 +451,7 @@ final class Error404 extends CMSPlugin implements SubscriberInterface
 	 *
 	 * @return  void
 	 *
-	 * @since   1.0.0
+	 * @since   26.06.00
 	 * @throws  Exception
 	 */
 	private function validateMenuItemState(object $item): void
@@ -449,7 +476,7 @@ final class Error404 extends CMSPlugin implements SubscriberInterface
 	 *
 	 * @return  void
 	 *
-	 * @since   1.0.0
+	 * @since   26.06.00
 	 * @throws  Exception
 	 */
 	private function validateArticleDeletion(object $item): void
@@ -469,7 +496,7 @@ final class Error404 extends CMSPlugin implements SubscriberInterface
 	 *
 	 * @return  void
 	 *
-	 * @since   1.0.0
+	 * @since   26.06.00
 	 * @throws  Exception
 	 */
 	private function validateMenuItemDeletion(object $item): void
@@ -489,7 +516,7 @@ final class Error404 extends CMSPlugin implements SubscriberInterface
 	 *
 	 * @return  void
 	 *
-	 * @since   1.0.0
+	 * @since   26.06.00
 	 * @throws  Exception
 	 */
 	private function revertArticleStates(array $pks): void
@@ -510,7 +537,7 @@ final class Error404 extends CMSPlugin implements SubscriberInterface
 	 *
 	 * @return  void
 	 *
-	 * @since   1.0.0
+	 * @since   26.06.00
 	 * @throws  Exception
 	 */
 	private function revertArticleState(int $pk, array $errorArticles): void
@@ -538,7 +565,7 @@ final class Error404 extends CMSPlugin implements SubscriberInterface
 	 *
 	 * @return  void
 	 *
-	 * @since   1.0.0
+	 * @since   26.06.00
 	 * @throws  Exception
 	 */
 	private function revertMenuItemStates(array $pks): void
@@ -559,7 +586,7 @@ final class Error404 extends CMSPlugin implements SubscriberInterface
 	 *
 	 * @return  void
 	 *
-	 * @since   1.0.0
+	 * @since   26.06.00
 	 * @throws  Exception
 	 */
 	private function revertMenuItemState(int $pk, array $errorMenuItems): void
@@ -585,7 +612,7 @@ final class Error404 extends CMSPlugin implements SubscriberInterface
 	 *
 	 * @return  array<int>
 	 *
-	 * @since   1.0.0
+	 * @since   26.06.00
 	 */
 	private function getErrorArticles(): array
 	{
@@ -614,7 +641,7 @@ final class Error404 extends CMSPlugin implements SubscriberInterface
 	 *
 	 * @return  int|null  Article ID or null if not found
 	 *
-	 * @since   1.0.0
+	 * @since   26.06.00
 	 */
 	private function extractArticleIdFromMenuLink(int $menuItemId): ?int
 	{
@@ -655,7 +682,7 @@ final class Error404 extends CMSPlugin implements SubscriberInterface
 	 *
 	 * @return  array<int>
 	 *
-	 * @since   1.0.0
+	 * @since   26.06.00
 	 */
 	private function getErrorMenuItems(): array
 	{
