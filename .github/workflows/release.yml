@@ -48,7 +48,7 @@ jobs:
           if [ -n "$PREVIOUS_TAG" ]; then
             echo "### Commits since $PREVIOUS_TAG" >> RELEASE_NOTES.md
             echo "" >> RELEASE_NOTES.md
-            git log $PREVIOUS_TAG..${{ steps.tag.outputs.tag }} --pretty=format:"- %s (%h)" >> RELEASE_NOTES.md
+            git log $PREVIOUS_TAG..${{ steps.tag.outputs.tag_with_v }} --pretty=format:"- %s (%h)" >> RELEASE_NOTES.md
           else
             echo "### Initial Release" >> RELEASE_NOTES.md
             echo "" >> RELEASE_NOTES.md
