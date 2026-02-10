@@ -7,7 +7,7 @@
 	<license>GNU General Public License version 3 or later</license>
 	<authorEmail>info@hkweb.nl</authorEmail>
 	<authorUrl>https://hkweb.nl</authorUrl>
-	<version>26.06.01</version>
+	<version>26.06.02</version>
 	<description>PLG_SYSTEM_ERROR404_XML_DESCRIPTION</description>
 
 	<namespace path="src">HKweb\Plugin\System\Error404</namespace>
